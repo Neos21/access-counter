@@ -49,7 +49,7 @@ export class CanvasService {
     
     // Counter Text
     context.fillStyle = `rgb(${rgb})`;
-    context.fillText(String(count).padStart(digit, '0'), this.paddingHorizontal, this.paddingVertical);
+    context.fillText(String(count).padStart(digit, '0').slice(-digit), this.paddingHorizontal, this.paddingVertical);
     
     const fileBuffer = canvas.toBuffer('image/png');
     const fileStream = stream.Readable.from(fileBuffer);
