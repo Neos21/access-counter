@@ -15,13 +15,13 @@ export class CounterController {
   ) { }
   
   @Get('pv')
-  public async updatePv(@Query('id') id: string, @Query('referrer') referrer: string, @Res() response: Response): Promise<Response> {
+  public async updatePv(@Query('id') id: string, @Query('referrer') referrer: string, @Query('landing') landing: string, @Res() response: Response): Promise<Response> {
     const numberId = this.validateNumber(id, 'ID', response);
     if(numberId == null) return;
     const site = await this.findOne(numberId, response);
     if(site == null) return;
     
-    if(!this.isEmpty(referrer)) this.logger.log(`ID [${site.id}] [${site.siteName}] : referrer [${referrer}]`);
+    if(!this.isEmpty(referrer)) this.logger.log(`ID [${site.id}] [${site.siteName}] : Referrer [${referrer}] Landing [${landing}]`);
     
     const updatedSite = await this.dbService.updatePv(numberId);
     if(updatedSite == null) return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ error: 'Failed To Update PV' });

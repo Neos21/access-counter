@@ -65,7 +65,7 @@ export class AdminController {
           </p>
           <script type="module">
             document.getElementById('count').addEventListener('click', () => {
-              fetch('/ct/pv?id=${id}&referrer=' + (document.referrer ?? ''))
+              fetch('/ct/pv?id=${id}&referrer=' + (document.referrer ?? '') + '&landing=' + location.href)
                 .then(response => response.json())
                 .then(json => console.log(json))
                 .catch(error => console.error(error));

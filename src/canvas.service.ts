@@ -44,7 +44,7 @@ export class CanvasService {
     context.fill();
     
     // Shadow Text
-    context.fillStyle = `rgba(${rgb}, .3)`;
+    context.fillStyle = `rgba(${rgb}, .25)`;
     context.fillText('8'.repeat(digit), this.paddingHorizontal, this.paddingVertical);
     
     // Counter Text
