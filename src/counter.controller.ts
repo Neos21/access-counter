@@ -3,7 +3,6 @@ import type { Response } from 'express';
 
 import { CanvasService } from './canvas.service';
 import { DbService } from './db.service';
-import type { Site } from './entities/site';
 
 @Controller('ct')
 export class CounterController {
@@ -16,10 +15,10 @@ export class CounterController {
   
   @Get('pv')
   public async updatePv(@Query('id') id: string, @Query('referrer') referrer: string, @Query('landing') landing: string, @Query('title') title: string, @Res() response: Response): Promise<Response> {
-    const numberId = this.validateNumber(id, 'ID', response);
-    if(numberId == null) return;
-    const site = await this.findOne(numberId, response);
-    if(site == null) return;
+    const [idError, numberId] = this.validateNumber(id, 'ID');
+    if(idError != null) return response.status(HttpStatus.BAD_REQUEST).json({ error: idError });
+    const site = await this.dbService.findOne(numberId);
+    if(site == null) return response.status(HttpStatus.BAD_REQUEST).json({ error: 'The Site Of The ID Does Not Exist' });
     
     if(!this.isEmpty(referrer)) this.logger.log(`ID [${site.id}] [${site.siteName}] : Referrer [${referrer}] Landing [${landing ?? ''}] Title [${title ?? ''}]`);
     
@@ -30,12 +29,12 @@ export class CounterController {
   
   @Get('total')
   public async totalImage(@Query('id') id: string, @Query('digit') digit: string, @Res() response: Response): Promise<void | Response> {
-    const numberId = this.validateNumber(id, 'ID', response);
-    if(numberId == null) return;
-    const numberDigit = this.validateNumber(digit, 'Digit', response);
-    if(numberDigit == null) return;
-    const site = await this.findOne(numberId, response);
-    if(site == null) return;
+    const [idError, numberId] = this.validateNumber(id, 'ID');
+    if(idError != null) return response.status(HttpStatus.BAD_REQUEST).json({ error: idError });
+    const [digitError, numberDigit] = this.validateNumber(digit, 'Digit');
+    if(digitError != null) return response.status(HttpStatus.BAD_REQUEST).json({ error: digitError });
+    const site = await this.dbService.findOne(numberId);
+    if(site == null) return response.status(HttpStatus.BAD_REQUEST).json({ error: 'The Site Of The ID Does Not Exist' });
     
     const fileStream = this.canvasService.createRedCounter(site.total, numberDigit);
     fileStream.pipe(response.status(HttpStatus.OK));
@@ -43,12 +42,12 @@ export class CounterController {
   
   @Get('today')
   public async todayImage(@Query('id') id: string, @Query('digit') digit: string, @Res() response: Response): Promise<void | Response> {
-    const numberId = this.validateNumber(id, 'ID', response);
-    if(numberId == null) return;
-    const numberDigit = this.validateNumber(digit, 'Digit', response);
-    if(numberDigit == null) return;
-    const site = await this.findOne(numberId, response);
-    if(site == null) return;
+    const [idError, numberId] = this.validateNumber(id, 'ID');
+    if(idError != null) return response.status(HttpStatus.BAD_REQUEST).json({ error: idError });
+    const [digitError, numberDigit] = this.validateNumber(digit, 'Digit');
+    if(digitError != null) return response.status(HttpStatus.BAD_REQUEST).json({ error: digitError });
+    const site = await this.dbService.findOne(numberId);
+    if(site == null) return response.status(HttpStatus.BAD_REQUEST).json({ error: 'The Site Of The ID Does Not Exist' });
     
     const fileStream = this.canvasService.createGreenCounter(site.today, numberDigit);
     fileStream.pipe(response.status(HttpStatus.OK));
@@ -56,12 +55,12 @@ export class CounterController {
   
   @Get('yesterday')
   public async yesterdayImage(@Query('id') id: string, @Query('digit') digit: string, @Res() response: Response): Promise<void | Response> {
-    const numberId = this.validateNumber(id, 'ID', response);
-    if(numberId == null) return;
-    const numberDigit = this.validateNumber(digit, 'Digit', response);
-    if(numberDigit == null) return;
-    const site = await this.findOne(numberId, response);
-    if(site == null) return;
+    const [idError, numberId] = this.validateNumber(id, 'ID');
+    if(idError != null) return response.status(HttpStatus.BAD_REQUEST).json({ error: idError });
+    const [digitError, numberDigit] = this.validateNumber(digit, 'Digit');
+    if(digitError != null) return response.status(HttpStatus.BAD_REQUEST).json({ error: digitError });
+    const site = await this.dbService.findOne(numberId);
+    if(site == null) return response.status(HttpStatus.BAD_REQUEST).json({ error: 'The Site Of The ID Does Not Exist' });
     
     const fileStream = this.canvasService.createYellowCounter(site.yesterday, numberDigit);
     fileStream.pipe(response.status(HttpStatus.OK));
@@ -71,25 +70,10 @@ export class CounterController {
     return value == null || String(value).trim() === '';
   }
   
-  private validateNumber(value: any, name: string, response: Response): number | null {
-    if(this.isEmpty(value)) {
-      response.status(HttpStatus.BAD_REQUEST).json({ error: `The Query ${name} Is Emtpy` });
-      return null;
-    }
+  private validateNumber(value: any, name: string): [string | null, number?] {
+    if(this.isEmpty(value)) return [`The Query ${name} Is Emtpy`];
     const number = Number(value);
-    if(Number.isNaN(number)) {
-      response.status(HttpStatus.BAD_REQUEST).json({ error: `The Query ${name} Is NaN` });
-      return null;
-    }
-    return number;
-  }
-  
-  private async findOne(id: number, response: Response): Promise<Site | null> {
-    const site = await this.dbService.findOne(id);
-    if(site == null) {
-      response.status(HttpStatus.BAD_REQUEST).json({ error: 'The Site Of The ID Does Not Exist' });
-      return null;
-    }
-    return site;
+    if(Number.isNaN(number)) return [`The Query ${name} Is NaN`];
+    return [null, number];
   }
 }

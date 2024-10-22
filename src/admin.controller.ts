@@ -23,7 +23,7 @@ export class AdminController {
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
-          <title>Access Controller Test Page</title>
+          <title>Access Counter Test Page</title>
           <style>
             table {
               border-collapse: collapse;
@@ -42,9 +42,8 @@ export class AdminController {
           </style>
         </head>
         <body>
-          <h1>Test Page : ID [${id}]</h1>
+          <h1>ID [${id}] <a href="${site.siteUrl}">${site.siteName}</a></h1>
           <table>
-            <caption><a href="${site.siteUrl}">${site.siteName}</a></caption>
             <tbody>
               <tr>
                 <td colspan="2"><img src="/ct/total?id=${id}&amp;digit=8"></td>
